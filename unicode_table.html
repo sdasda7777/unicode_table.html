@@ -1,0 +1,195 @@
+<div id="mainDiv">
+
+</div>
+
+
+
+
+<script>
+
+
+/* Start of settings */
+
+// You shouldn't have to change anything else in the code.
+// If you do, make an issue, I will try to implement it as a functionality.
+
+// This is which headers should be drawn
+const HEX_VALUE_LEFT = true;
+const DEC_VALUE_LEFT = true;
+const HEX_VALUE_TOP  = true;
+const DEC_VALUE_TOP  = true;
+
+// This is whether headers are padded to be uniform (i.e. 0F and 15), or minimal (i.e. F and 15)
+const UNIFORM_HEADER_PADDING_LEFT = true;
+const UNIFORM_HEADER_PADDING_TOP = true;
+
+// This is size of the table without headers
+const CHAR_COLS = 16;
+const CHAR_ROWS = 65;
+
+// These are overrides (the text here is shown instead of the character corresponding to the given number)
+// This is primarily used when the actual character cannot be properly displayed,
+//   but you can choose to override as you see fit
+const CHAR_OVERRIDES = {
+						   0: "NUL",  1: "SOH",   2: "STX",  3: "ETX",   4: "EOT",
+						   5: "ENQ",  6: "ACK",   7: "BEL",  8: "BS",    9: "TAB",
+					      10: "LF",  11: "VT",   12: "FF",  13: "CR",   14: "SO",
+					      15: "SI",  16: "DLE",  17: "DC1", 18: "DC2",  19: "DC3",
+					      20: "DC4", 21: "NAK",  22: "SYN", 23: "ETB",  24: "CAN",
+					      25: "EM",  26: "SUB",  27: "ESC", 28: "FS",   29: "GS",
+					      30: "RS",  31: "US",   32: "SPC",
+						  
+						  127: "DEL",
+						  
+						  160: "NBS",
+						  173: "SHY"
+						};
+/* End of settings */
+
+
+
+
+// Notice this is after the end of settings, not a part of it
+const SMALLEST_HEADER_BASE = 10;
+
+function autoformat(number, maxnumber, base = 10, minbase = 10, upper = true){
+	let maxstring = maxnumber.toString(minbase);
+	let numstring = (upper ? number.toString(base).toUpperCase() : number.toString(base));
+	let zeroes = new Array(maxstring.length - numstring.length).fill("0").join("");
+    return zeroes + numstring;
+}
+
+
+
+
+table = document.createElement("table");
+
+if(HEX_VALUE_TOP){
+	let hexHeaderRow = document.createElement("tr");
+	
+	if(HEX_VALUE_LEFT){
+		let hexAdd = document.createElement("th");
+		hexAdd.innerText = "+";
+		hexHeaderRow.appendChild(hexAdd);
+	}
+	if(DEC_VALUE_LEFT){
+		let decSpace = document.createElement("th");
+		decSpace.innerText = "";
+		hexHeaderRow.appendChild(decSpace);
+	}
+	
+	for(let ii = 0; ii < CHAR_COLS; ++ii){
+		let hexNumber = document.createElement("th");
+		hexNumber.className = "charColCell";
+		hexNumber.innerText = autoformat(ii, CHAR_COLS - 1,
+										 16, (UNIFORM_HEADER_PADDING_TOP ? SMALLEST_HEADER_BASE : 16));
+		hexHeaderRow.appendChild(hexNumber);
+	}
+	
+	table.appendChild(hexHeaderRow);
+}
+if(DEC_VALUE_TOP){
+	decHeaderRow = document.createElement("tr");
+	
+	if(HEX_VALUE_LEFT){
+		let hexSpace = document.createElement("th");
+		hexSpace.innerText = "";
+		decHeaderRow.appendChild(hexSpace);
+	}
+	if(DEC_VALUE_LEFT){
+		let decAdd = document.createElement("th");
+		decAdd.innerText = "+";
+		decHeaderRow.appendChild(decAdd);
+	}
+	
+	for(let ii = 0; ii < CHAR_COLS; ++ii){
+		let decNumber = document.createElement("th");
+		decNumber.className = "charColCell";
+		decNumber.innerText = autoformat(ii, CHAR_COLS - 1,
+										 10, (UNIFORM_HEADER_PADDING_TOP ? SMALLEST_HEADER_BASE : 10));
+		decHeaderRow.appendChild(decNumber);
+	}
+	
+	table.appendChild(decHeaderRow);
+}
+
+for(let ii = 0; ii < CHAR_ROWS; ++ii){
+	commonRow = document.createElement("tr");
+	
+	if(HEX_VALUE_LEFT){
+		let hexNumber = document.createElement("th");
+		hexNumber.innerText = autoformat(ii * CHAR_COLS, CHAR_ROWS * CHAR_COLS,
+											16, (UNIFORM_HEADER_PADDING_LEFT ? SMALLEST_HEADER_BASE : 16));
+		commonRow.appendChild(hexNumber);
+	}
+	if(DEC_VALUE_LEFT){
+		let decNumber = document.createElement("th");
+		decNumber.innerText = autoformat(ii * CHAR_COLS, CHAR_ROWS * CHAR_COLS, 10, 
+										(UNIFORM_HEADER_PADDING_LEFT ? SMALLEST_HEADER_BASE : 10));
+		commonRow.appendChild(decNumber);
+	}
+	
+	for(let jj = 0; jj < CHAR_COLS; ++jj){
+		let charCell = document.createElement("td");
+		charCell.className = "charColCell";
+		let charVal = ii * CHAR_COLS + jj;
+		
+		if(charVal in CHAR_OVERRIDES){
+			charCell.innerText = CHAR_OVERRIDES[charVal];
+		}else{
+			charCell.innerText = String.fromCharCode(charVal);
+		}
+
+		commonRow.appendChild(charCell);
+	}
+	
+	table.appendChild(commonRow);
+}
+
+document.getElementById("mainDiv").appendChild(table);
+</script>
+
+
+
+
+<style>
+
+* {
+	background-color: black;
+}
+
+table, tr, th, td {
+	border: 1px solid gray;
+	border-collapse: collapse;
+	
+	text-align: center;
+	padding-left:  1px;
+	padding-right: 1px;
+	
+	/* Adjust this if you want different color of the characters */
+	color: white;
+}
+
+
+table {
+    table-layout:fixed;
+	
+	/* Adjust this if you want slimmer table: */
+	width: 100%;
+}
+
+th {
+	border: 2px solid gray;
+	
+	/* Adjust this if you want different color of the table headers: */
+	color: magenta;
+}
+
+.charColCell {
+	overflow: hidden;
+    text-overflow: ellipsis;
+	
+	/* Adjust this if you want different size of the cells with characters */
+	width: 35px;
+}
+</style>
